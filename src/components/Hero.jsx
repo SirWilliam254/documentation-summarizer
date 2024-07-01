@@ -14,10 +14,10 @@ const Hero = () => {
             Github
         </button>
     </nav>
-    <h1 className='head_text'>Summarize articles with<span className='orange_gradient'> Open AI GPT-4
+    <h1 className='head_text'>Summarize docs with <br /> <span className='orange_gradient'> Open AI GPT-4
     </span></h1>
     <h2 className='desc'>
-        summarize lengthy articles to more succinct form using chat gpt
+        summarize lengthy Documentations to more succinct form using chat gpt
     </h2>
     </header>
   )

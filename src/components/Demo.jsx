@@ -8,8 +8,19 @@ const Demo = () => {
         url: '',
         summary: ''
     });
-
+    
     const [getSummary, { error, isFetching }] = useLazyGetSummaryQuery();
+    const [allArticles, setAllArticles] = useState([]);
+    const [copiedUrl, setCopiedUrl] = useState("");
+
+    useEffect(() => {
+        const articlesFromLocalStorage = JSON.parse(localStorage.getItem('articles'))
+
+      if (articlesFromLocalStorage){
+        setAllArticles(articlesFromLocalStorage)
+      }  
+    }, []);
+
 
     const handleSubmit = async(e) => {
         e.preventDefault();
@@ -19,10 +30,18 @@ const Demo = () => {
 
         if(data?.summary){
             const newArticle = { ...article, summary: data.summary };
+            const updatedAllArticles = [newArticle, ...allArticles]; // update the new article to the spread of the other previous articles
             setArticle(newArticle);
-            console.log(newArticle);
+            setAllArticles(updatedAllArticles);
+            //set articles to local storage
+            localStorage.setItem('articles', JSON.stringify(updatedAllArticles));
         }
+    };
 
+    const handleCopy = (copyUrl) => {
+        setCopiedUrl(copyUrl);
+        navigator.clipboard.writeText(copyUrl);
+        setTimeout(() => setCopiedUrl(false), 5000);
     };
 
   return (
@@ -55,9 +74,55 @@ const Demo = () => {
             </form>
 
                 {/* Browser History */}
+            <div className="flex flex-col gap-1 max-h-60 overflow-y-auto">
+                {allArticles.map((item, index) => (
+                    <div
+                    key={`link-${index}`}
+                    onClick={() => setArticle(item)}
+                    className="link_card"
+                    > 
+                        <div className="copy_btn" onClick={() => handleCopy(item.url)}>
+                            <img 
+                                src={copiedUrl === item.url ? tick : copy}
+                                alt="copy_icon"
+                                className="w-[40%] h-[40%] object-contain"
+                            />
+                        </div>
+
+                        <p className="flex-1 font-satoshi text-blue-500 font-medium text-sm truncate">{item.url}</p>
+                    </div>
+                ))}
+            </div>
+
+
         </div>
       
             {/* Display Results */}
+        <div className="my-10 max-w-full flex justify-center items-center">
+                {isFetching ? (
+                    <img src={loader} alt="loader" className="w-20 h-20 object-contain" />
+                ) : error ? (
+                    <p className="font-inter font-bold text-red text-center">
+                        Oops! something went wrong.
+                        <br />
+                        <span className="font-satoshi font-normal text-gray-700">
+                            {error?.data?.error}
+                        </span>
+                    </p>
+                ) : (
+                    article.summary && (
+                        <div className="flex flex-col gap-3">
+                            <h2 className="font-satoshi font-bold text-white text-xl">
+                                Documentation <span className="orange_gradient"> Summary: </span>
+                            </h2>
+                            <div className="summary_box">
+                                <p className="text-gray-300 font-inter font-medium text-center">{article.summary}</p>
+                            </div>
+                        </div>
+                    )
+                )}
+
+        </div>
     </section>
   )
 }
